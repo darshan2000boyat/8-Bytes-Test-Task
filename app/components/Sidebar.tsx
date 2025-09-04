@@ -21,7 +21,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="fixed top-0 right-0 z-10 h-full w-72 bg-white text-black shadow-lg flex flex-col p-4">
+    <aside className="hidden lg:fixed top-0 right-0 z-10 h-full w-72 bg-white text-black shadow-lg lg:flex flex-col p-4">
       <nav className="flex-1 pt-20 space-y-4">
         {/* Quick Actions */}
         <div className="card w-full shadow-sm">
