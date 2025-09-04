@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { FiMenu, FiX, FiSearch, FiBell } from "react-icons/fi";
 
-const Navbar = () => {
+interface NavbarProps {
+    onSearchClick: () => void;
+  }
+
+const Navbar: React.FC<NavbarProps> = ({ onSearchClick }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
@@ -60,7 +64,7 @@ const Navbar = () => {
       {/* Right - Actions */}
       <div className="navbar-end space-x-2">
         <button aria-label="Search" className="btn btn-ghost btn-circle">
-          <FiSearch className="text-xl" />
+          <FiSearch className="text-xl"  onClick={onSearchClick} />
         </button>
 
         <button aria-label="Notifications" className="btn btn-ghost btn-circle">
