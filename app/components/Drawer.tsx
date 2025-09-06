@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { MdSpaceDashboard, MdBarChart } from "react-icons/md";
 import { PiChartDonutFill } from "react-icons/pi";
+import { TbBulb } from "react-icons/tb";
 
 const Drawer = () => {
   return (
@@ -48,10 +49,14 @@ const Drawer = () => {
           {/* Bottom Card */}
           <div className="card bg-black text-white w-full h-72 mt-6">
             <div className="card-body p-4">
-              <h3 className="text-lg font-bold">Insightful</h3>
+              <div className="flex gap-2">
+                <TbBulb className="text-2xl" />
+                <h3 className="text-lg font-bold">Insightful</h3>
+              </div>
               <p className="text-sm leading-7 text-gray-300">
                 This is a demo financial dashboard application built with
-                Next.js and Tailwind CSS for test task provided by 8Byte developed by <span className="font-bold"> Darshan Boyat.</span> 
+                Next.js and Tailwind CSS for test task provided by 8Byte
+                developed by <span className="font-bold"> Darshan Boyat.</span>
               </p>
             </div>
           </div>
