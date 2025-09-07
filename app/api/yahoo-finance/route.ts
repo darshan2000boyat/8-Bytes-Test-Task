@@ -24,7 +24,7 @@ export async function GET(
 
   try {
     // Add .NS suffix for Indian stocks (NSE)
-    const formattedSymbol = symbol.endsWith(".NS") ? symbol : `${symbol}.NS`;
+    const formattedSymbol = symbol.endsWith(".NS") || symbol.endsWith(".BO") ? symbol : `${symbol}.NS`;
 
     // Make request to Yahoo Finance API
     const response = await axios.get(`${YAHOO_FINANCE_API}${formattedSymbol}`);

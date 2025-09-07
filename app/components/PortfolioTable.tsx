@@ -24,17 +24,32 @@ const PortfolioTable = () => {
     useState<keyof PortfolioHolding>("particulars");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const fetchYahooData = async (symbol: string) => {
     try {
       // Add .NS suffix for Indian stocks
-      const formattedSymbol = symbol.endsWith(".NS") ? symbol : `${symbol}.NS`;
+      const formattedSymbol = symbol.endsWith(".NS") || symbol.endsWith(".BO") ? symbol : `${symbol}.NS`;
       const response = await fetch(
         `/api/yahoo-finance?symbol=${formattedSymbol}`
       );
 
       if (!response.ok) {
+        
+        let errorBody = "No error details available";
+      try {
+        errorBody = await response.text();
+      } catch (e) {
+        console.warn("Could not read response body:", e);
+      }
+      
+      console.error(`Yahoo Finance API Error:
+        Status: ${response.status} ${response.statusText}
+        URL: ${response.url}
+        Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}
+        Body: ${errorBody}
+      `);
+        
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -67,18 +82,18 @@ const PortfolioTable = () => {
     const updatedHoldings = await Promise.all(
       sampleData.map(async (holding) => {
         try {
-          // Fetch CMP from Yahoo Finance
+          // ✅ Fetch CMP directly (no setInterval here)
           const yahooData = await fetchYahooData(holding.exchange);
-          // Fetch P/E ratio and earnings from Google Finance
-          const googleData = await fetchGoogleData(holding.exchange);
-
           const cmp = yahooData?.price || holding.cmp;
+    
+          // ✅ Fetch P/E ratio and earnings from Google Finance
+          const googleData = await fetchGoogleData(holding.exchange);
           const peRatio = googleData?.peRatio || holding.peRatio;
           const latestEarnings = googleData?.earnings || holding.latestEarnings;
-
+    
           const presentValue = cmp * holding.qty;
           const gainLoss = presentValue - holding.investment;
-
+    
           return {
             ...holding,
             cmp,
@@ -88,14 +103,12 @@ const PortfolioTable = () => {
             latestEarnings,
           };
         } catch (error) {
-          console.error(
-            `Error updating data for ${holding.particulars}:`,
-            error
-          );
+          console.error(`Error updating data for ${holding.particulars}:`, error);
           return holding;
         }
       })
     );
+    
 
     setHoldings(updatedHoldings);
     setLoading(false);
@@ -105,7 +118,7 @@ const PortfolioTable = () => {
   useEffect(() => {
     setHoldings(sampleData);
     setLoading(false);
-
+    updateMarketData()
     // In a real app, you would call updateMarketData() here
     // updateMarketData();
   }, []);
@@ -153,13 +166,13 @@ const PortfolioTable = () => {
 
   // Pagination controls
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  
+
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
-  
+
   const prevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -168,14 +181,14 @@ const PortfolioTable = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="f lex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-white rounded-lg shadow-md overflow-hidden pt-24">
+    <div className="px-6 w-full bg-white rounded-lg shadow-md overflow-hidden pt-24">
       <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-800">
@@ -183,7 +196,10 @@ const PortfolioTable = () => {
           </h2>
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <label htmlFor="itemsPerPage" className="mr-2 text-sm text-gray-700">
+              <label
+                htmlFor="itemsPerPage"
+                className="mr-2 text-sm text-gray-700"
+              >
                 Show:
               </label>
               <select
@@ -387,42 +403,49 @@ const PortfolioTable = () => {
         <div className="flex-1 flex justify-between items-center">
           <div>
             <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">{indexOfFirstItem + 1}</span> to{" "}
+              Showing{" "}
+              <span className="font-medium">{indexOfFirstItem + 1}</span> to{" "}
               <span className="font-medium">
                 {Math.min(indexOfLastItem, sortedHoldings.length)}
               </span>{" "}
-              of <span className="font-medium">{sortedHoldings.length}</span> results
+              of <span className="font-medium">{sortedHoldings.length}</span>{" "}
+              results
             </p>
           </div>
           <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <nav
+              className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+              aria-label="Pagination"
+            >
               <button
                 onClick={prevPage}
                 disabled={currentPage === 1}
                 className={`relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
-                  currentPage === 1 
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed" 
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                     : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 Previous
               </button>
-              
+
               {/* Page numbers */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => paginate(page)}
-                  className={`relative inline-flex items-center px-3 py-2 border text-sm font-medium ${
-                    currentPage === page
-                      ? "z-10 bg-blue-600 border-blue-600 text-white"
-                      : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => paginate(page)}
+                    className={`relative inline-flex items-center px-3 py-2 border text-sm font-medium ${
+                      currentPage === page
+                        ? "z-10 bg-blue-600 border-blue-600 text-white"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+
               <button
                 onClick={nextPage}
                 disabled={currentPage === totalPages}

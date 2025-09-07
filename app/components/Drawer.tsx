@@ -38,7 +38,7 @@ const Drawer = () => {
             </li>
             <li>
               <Link
-                href="/about"
+                href="/sector-breakdown"
                 className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-gray-100"
               >
                 <PiChartDonutFill className="text-2xl" /> Sector Groups

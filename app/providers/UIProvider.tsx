@@ -34,7 +34,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     <UIContext.Provider value={{ isSearchOpen, toggleSearch }}>
       <Navbar onSearchClick={toggleSearch} />
       <Drawer />
-      <main className="pl-16">{children}</main>
+      <main className="min-h-screen">{children}</main>
       <SearchOverlay isOpen={isSearchOpen} onClose={toggleSearch} />
     </UIContext.Provider>
   );

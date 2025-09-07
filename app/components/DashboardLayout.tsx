@@ -82,7 +82,7 @@ const DashboardLayout = () => {
   );
 
   return (
-    <section className="w-full lg:w-[80%] min-h-screen overflow-y-scroll bg-white text-black grid grid-cols-1 gap-6 pt-24 pb-12 px-4">
+    <section className="w-full lg:w-[80%]  overflow-y-scroll bg-white text-black grid grid-cols-1 gap-6 pt-24 pb-12 px-4">
       {/* Row 1: 4 cards */}
       <aside className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {row1Data.map((card, idx) => (
