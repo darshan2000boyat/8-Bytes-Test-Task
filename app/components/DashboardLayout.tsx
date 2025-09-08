@@ -83,7 +83,6 @@ const DashboardLayout = () => {
 
   return (
     <section className="w-full lg:w-[80%]  overflow-y-scroll bg-white text-black grid grid-cols-1 gap-6 pt-24 pb-12 px-4">
-      {/* Row 1: 4 cards */}
       <aside className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {row1Data.map((card, idx) => (
           <section
@@ -111,7 +110,6 @@ const DashboardLayout = () => {
         ))}
       </aside>
 
-      {/* Row 2: 60/40 split */}
       <aside className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section className="w-full h-96 rounded-lg shadow-lg p-4">
           <h2 className="text-xl font-bold text-black mb-4">
@@ -137,7 +135,6 @@ const DashboardLayout = () => {
         <TopHoldings />
       </aside>
 
-      {/* Row 3: Donut & Pie Charts */}
       <aside className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <section className="relative w-full bg-white shadow-lg rounded-lg p-4">
           <h2 className="text-xl font-bold mb-2 text-black">
@@ -145,7 +142,6 @@ const DashboardLayout = () => {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 justify-between items-center">
-            {/* Chart column with fixed height */}
             <div className="w-full h-64 flex justify-center items-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -167,7 +163,6 @@ const DashboardLayout = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Legend column */}
             <div className="flex justify-center sm:justify-start">
               {renderLegend(assetAllocationData)}
             </div>
@@ -179,7 +174,6 @@ const DashboardLayout = () => {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 justify-between items-center">
-            {/* Chart column with fixed height */}
             <div className="w-full h-64 flex justify-center items-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -199,7 +193,6 @@ const DashboardLayout = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Legend column */}
             <div className="flex justify-center sm:justify-start">
               {renderLegend(sectorBreakdownData)}
             </div>

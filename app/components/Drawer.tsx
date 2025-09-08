@@ -7,7 +7,6 @@ import { TbBulb } from "react-icons/tb";
 const Drawer = () => {
   return (
     <div className="drawer">
-      {/* Checkbox toggle (linked with Navbar) */}
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
 
       <div className="drawer-side">
@@ -18,7 +17,6 @@ const Drawer = () => {
         ></label>
 
         <div className="bg-white text-black min-h-full w-80 p-6 flex flex-col justify-between">
-          {/* Menu */}
           <ul className="space-y-3 text-lg font-medium pt-20">
             <li>
               <Link
@@ -46,7 +44,6 @@ const Drawer = () => {
             </li>
           </ul>
 
-          {/* Bottom Card */}
           <div className="card bg-black text-white w-full h-72 mt-6">
             <div className="card-body p-4">
               <div className="flex gap-2">

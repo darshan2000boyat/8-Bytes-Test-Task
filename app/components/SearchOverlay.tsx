@@ -8,7 +8,6 @@ interface SearchOverlayProps {
 const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Close when clicking outside
   const handleClickOutside = (e: MouseEvent) => {
     if (overlayRef.current && e.target === overlayRef.current) {
       onClose();
@@ -31,7 +30,6 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose }) => {
     >
       <div className="w-full max-w-md p-6 bg-white/20 backdrop-blur-lg rounded-xl shadow-lg">
         <label className="flex items-center gap-2 w-full bg-white/30 backdrop-blur-md rounded-lg px-4 py-2">
-          {/* Search Icon */}
           <svg
             className="h-5 w-5 text-white/70"
             xmlns="http://www.w3.org/2000/svg"

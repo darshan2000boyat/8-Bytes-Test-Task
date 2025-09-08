@@ -100,7 +100,6 @@ const TopHoldings = () => {
         </div>
       </div>
 
-      {/* Sorting Controls */}
       <div className="flex flex-wrap gap-2 mb-4">
         <span className="text-sm font-medium text-gray-700">Sort by:</span>
         {(["name", "value", "change", "weight"] as SortField[]).map((field) => (
@@ -119,7 +118,6 @@ const TopHoldings = () => {
         ))}
       </div>
 
-      {/* Holdings List */}
       <div
         className="overflow-y-auto"
         style={{ maxHeight: "calc(100% - 85px)" }}

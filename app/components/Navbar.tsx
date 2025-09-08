@@ -6,8 +6,8 @@ import Image from "next/image";
 import { FiMenu, FiX, FiSearch, FiBell } from "react-icons/fi";
 
 interface NavbarProps {
-    onSearchClick: () => void;
-  }
+  onSearchClick: () => void;
+}
 
 const Navbar: React.FC<NavbarProps> = ({ onSearchClick }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -30,7 +30,6 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchClick }) => {
 
   return (
     <nav className="fixed top-0 left-0 z-40 navbar bg-white text-black shadow-sm">
-      {/* Left - Menu */}
       <div className="navbar-start">
         <label
           htmlFor="my-drawer"
@@ -45,7 +44,6 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchClick }) => {
         </label>
       </div>
 
-      {/* Center - Logo */}
       <div className="navbar-center">
         <Link href="/" className="text-xl">
           <div className="flex items-center">
@@ -61,10 +59,9 @@ const Navbar: React.FC<NavbarProps> = ({ onSearchClick }) => {
         </Link>
       </div>
 
-      {/* Right - Actions */}
       <div className="navbar-end space-x-2">
         <button aria-label="Search" className="btn btn-ghost btn-circle">
-          <FiSearch className="text-xl"  onClick={onSearchClick} />
+          <FiSearch className="text-xl" onClick={onSearchClick} />
         </button>
 
         <button aria-label="Notifications" className="btn btn-ghost btn-circle">

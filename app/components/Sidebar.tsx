@@ -6,7 +6,7 @@ const Sidebar = () => {
   // Dummy data
   const watchlist = [
     { symbol: "AAPL", name: "Apple Inc.", price: 192.32, change: "+1.24%" },
-    { symbol: "TSLA", name: "Tesla Inc.", price: 742.18, change: "-0.82%" }
+    { symbol: "TSLA", name: "Tesla Inc.", price: 742.18, change: "-0.82%" },
   ];
 
   const news = [
@@ -23,7 +23,6 @@ const Sidebar = () => {
   return (
     <aside className="hidden lg:fixed top-0 right-0 z-10 h-full w-72 bg-white text-black shadow-lg lg:flex flex-col p-4">
       <nav className="flex-1 pt-20 space-y-4">
-        {/* Quick Actions */}
         <div className="card w-full shadow-sm">
           <div className="card-body">
             <h2 className="text-xl font-bold text-center">Quick Actions</h2>
@@ -34,7 +33,6 @@ const Sidebar = () => {
           </div>
         </div>
 
-        {/* Watchlist */}
         <div className="card w-full shadow-sm">
           <div className="card-body">
             <h2 className="text-xl font-bold">Watchlist</h2>
@@ -66,7 +64,6 @@ const Sidebar = () => {
           </div>
         </div>
 
-        {/* Market News */}
         <div className="card w-full shadow-sm">
           <div className="card-body">
             <h2 className="text-xl font-bold">Market News</h2>

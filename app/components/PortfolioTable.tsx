@@ -1,6 +1,8 @@
 "use client";
 import { sampleData } from "@/lib/data";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type PortfolioHolding = {
   id: number;
@@ -25,32 +27,22 @@ const PortfolioTable = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchYahooData = async (symbol: string) => {
     try {
-      // Add .NS suffix for Indian stocks
-      const formattedSymbol = symbol.endsWith(".NS") || symbol.endsWith(".BO") ? symbol : `${symbol}.NS`;
+      const formattedSymbol =
+        symbol.endsWith(".NS") || symbol.endsWith(".BO")
+          ? symbol
+          : `${symbol}.NS`;
       const response = await fetch(
         `/api/yahoo-finance?symbol=${formattedSymbol}`
       );
 
       if (!response.ok) {
-        
-        let errorBody = "No error details available";
-      try {
-        errorBody = await response.text();
-      } catch (e) {
-        console.warn("Could not read response body:", e);
-      }
-      
-      console.error(`Yahoo Finance API Error:
-        Status: ${response.status} ${response.statusText}
-        URL: ${response.url}
-        Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}
-        Body: ${errorBody}
-      `);
-        
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 404) {
+          toast.error(`Yahoo Finance: No data found for ${symbol}`);
+        }
       }
 
       const data = await response.json();
@@ -61,12 +53,15 @@ const PortfolioTable = () => {
     }
   };
 
-  // Function to fetch data from Google Finance API
   const fetchGoogleData = async (symbol: string) => {
     try {
-      // In a real implementation, this would call your backend API
-      // which would then call the Google Finance API
       const response = await fetch(`/api/google-finance?symbol=${symbol}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast.error(`Google Finance: No data found for ${symbol}`);
+        }
+      }
+
       const data = await response.json();
       return data;
     } catch (error) {
@@ -75,25 +70,34 @@ const PortfolioTable = () => {
     }
   };
 
-  // Function to update market data for all holdings
-  const updateMarketData = async () => {
+  const sortedHoldings = [...holdings].sort((a, b) => {
+    if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1;
+    if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedHoldings.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(sortedHoldings.length / itemsPerPage);
+
+  const updateMarketData = useCallback(async () => {
     setLoading(true);
 
     const updatedHoldings = await Promise.all(
-      sampleData.map(async (holding) => {
+      holdings.map(async (holding) => {
         try {
-          // ✅ Fetch CMP directly (no setInterval here)
           const yahooData = await fetchYahooData(holding.exchange);
           const cmp = yahooData?.price || holding.cmp;
-    
-          // ✅ Fetch P/E ratio and earnings from Google Finance
+
           const googleData = await fetchGoogleData(holding.exchange);
           const peRatio = googleData?.peRatio || holding.peRatio;
-          const latestEarnings = googleData?.earnings || holding.latestEarnings;
-    
+          const latestEarnings =
+            googleData?.latestEarnings || holding.latestEarnings;
+
           const presentValue = cmp * holding.qty;
           const gainLoss = presentValue - holding.investment;
-    
+
           return {
             ...holding,
             cmp,
@@ -103,40 +107,37 @@ const PortfolioTable = () => {
             latestEarnings,
           };
         } catch (error) {
-          console.error(`Error updating data for ${holding.particulars}:`, error);
+          console.error(
+            `Error updating data for ${holding.particulars}:`,
+            error
+          );
           return holding;
         }
       })
     );
-    
 
     setHoldings(updatedHoldings);
+    setLastUpdated(new Date());
     setLoading(false);
-  };
+  }, [holdings]);
 
-  // Initialize data
   useEffect(() => {
-    setHoldings(sampleData);
-    setLoading(false);
-    updateMarketData()
-    // In a real app, you would call updateMarketData() here
-    // updateMarketData();
+    const initializeData = async () => {
+      setHoldings(sampleData);
+      setLoading(false);
+    };
+
+    initializeData();
   }, []);
 
-  // Sort holdings
-  const sortedHoldings = [...holdings].sort((a, b) => {
-    if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1;
-    if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
+  useEffect(() => {
+    if (holdings.length > 0) {
+      setInterval(() => {
+        updateMarketData();
+      }, 60 * 1000);
+    }
+  }, [sampleData.length, holdings.length]);
 
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedHoldings.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(sortedHoldings.length / itemsPerPage);
-
-  // Handle sort click
   const handleSort = (field: keyof PortfolioHolding) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -144,10 +145,9 @@ const PortfolioTable = () => {
       setSortField(field);
       setSortDirection("asc");
     }
-    setCurrentPage(1); // Reset to first page when sorting
+    setCurrentPage(1);
   };
 
-  // Format currency
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -157,31 +157,20 @@ const PortfolioTable = () => {
     }).format(value);
   };
 
-  // Calculate totals
   const totals = {
     investment: holdings.reduce((sum, h) => sum + h.investment, 0),
     presentValue: holdings.reduce((sum, h) => sum + h.presentValue, 0),
     gainLoss: holdings.reduce((sum, h) => sum + h.gainLoss, 0),
   };
 
-  // Pagination controls
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const nextPage = () =>
+    currentPage < totalPages && setCurrentPage(currentPage + 1);
+  const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
-  const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  if (loading) {
+  if (loading && holdings.length === 0) {
     return (
-      <div className="f lex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
@@ -211,18 +200,26 @@ const PortfolioTable = () => {
                 }}
                 className="border border-gray-300 text-black rounded-md px-2 py-1 text-sm"
               >
+                <option value="2">2</option>
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="20">20</option>
                 <option value="50">50</option>
               </select>
             </div>
-            <button
-              onClick={updateMarketData}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Refresh Data
-            </button>
+            <div className="flex items-center space-x-2">
+              {lastUpdated && (
+                <span className="text-sm text-gray-500">
+                  Last updated: {lastUpdated.toLocaleTimeString()}
+                </span>
+              )}
+              {/* <button
+                onClick={updateMarketData}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Refresh Data
+              </button> */}
+            </div>
           </div>
         </div>
       </div>
@@ -231,92 +228,38 @@ const PortfolioTable = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("particulars")}
-              >
-                Particulars{" "}
-                {sortField === "particulars" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("purchasePrice")}
-              >
-                Purchase Price{" "}
-                {sortField === "purchasePrice" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("qty")}
-              >
-                Qty{" "}
-                {sortField === "qty" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("investment")}
-              >
-                Investment{" "}
-                {sortField === "investment" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("portfolioPct")}
-              >
-                Portfolio (%){" "}
-                {sortField === "portfolioPct" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("exchange")}
-              >
-                NSE/BSE{" "}
-                {sortField === "exchange" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("cmp")}
-              >
-                CMP{" "}
-                {sortField === "cmp" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("presentValue")}
-              >
-                Present Value{" "}
-                {sortField === "presentValue" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("gainLoss")}
-              >
-                Gain/Loss{" "}
-                {sortField === "gainLoss" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("peRatio")}
-              >
-                P/E Ratio{" "}
-                {sortField === "peRatio" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("latestEarnings")}
-              >
-                Latest Earnings{" "}
-                {sortField === "latestEarnings" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
+              {[
+                "particulars",
+                "purchasePrice",
+                "qty",
+                "investment",
+                "portfolioPct",
+                "exchange",
+                "cmp",
+                "presentValue",
+                "gainLoss",
+                "peRatio",
+                "latestEarnings",
+              ].map((field) => (
+                <th
+                  key={field}
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort(field as keyof PortfolioHolding)}
+                >
+                  {field === "cmp"
+                    ? "CMP"
+                    : field === "qty"
+                    ? "Qty"
+                    : field === "portfolioPct"
+                    ? "Portfolio (%)"
+                    : field === "peRatio"
+                    ? "P/E Ratio"
+                    : field === "latestEarnings"
+                    ? "Latest Earnings"
+                    : field.charAt(0).toUpperCase() + field.slice(1)}{" "}
+                  {sortField === field && (sortDirection === "asc" ? "↑" : "↓")}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -429,7 +372,6 @@ const PortfolioTable = () => {
                 Previous
               </button>
 
-              {/* Page numbers */}
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                 (page) => (
                   <button
@@ -461,6 +403,7 @@ const PortfolioTable = () => {
           </div>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };
