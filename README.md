@@ -1,8 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📈 Eight Bytes Test Task
 
-## Getting Started
+This is the test task [Portfolio Dashboard] with yahoo-finance and google-finance api, however I opt an API call for yahoo finance data, but web scrapping using puppeteer package as the google not provide API or package to fetch their finance data.
 
-First, run the development server:
+---
+
+## 👤 Author
+
+**Darshan Boyat**
+
+---
+
+## Tech Stack
+
+**Next 15**
+**TypeScript**
+**rechart**
+**Tanstack react-table**
+**Daisy.ui**
+**react-icons**
+**react-toastify**
+
+## 🚀 Getting Started
+
+Follow these steps to set up and run the project locally:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com//darshan2000boyat/8-Bytes-Test-Task.git
+```
+
+### 2. Navigate to the Project Directory
+
+```bash
+cd 8-Bytes-Test-Task
+```
+
+### 3. Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+### 4. Start the Development Server
 
 ```bash
 npm run dev
@@ -14,23 +60,23 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🌐 Open in Browser
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Visit [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📝 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Edit the main page at `app/page.tsx`. Changes auto-update as you edit.
+- Uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) for font optimization.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## ☁️ Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Deploy easily with [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For more info, see the [Next.js deployment docs](https://nextjs.org/docs/app/building-your-application/deploying).

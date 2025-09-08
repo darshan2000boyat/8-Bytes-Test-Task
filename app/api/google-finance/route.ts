@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer, { Browser, Page } from "puppeteer";
+import puppeteer, { Browser } from "puppeteer";
 import { scrapeStockData } from "./scrapper";
 
 
@@ -17,8 +17,7 @@ interface ScrapingResult {
 }
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { symbol: string } }
+  request: NextRequest
 ) {
   const { searchParams } = new URL(request.url);
   const unformatedSymbol = searchParams.get("symbol");
